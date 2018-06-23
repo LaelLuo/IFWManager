@@ -62,7 +62,7 @@ class ManagerActivity : AppCompatActivity() {
             })
 //            输入触发事件
             actionView?.let { it as SearchView }?.apply {
-                maxWidth = 10000
+                maxWidth = 1000
                 setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                     override fun onQueryTextSubmit(query: String?) = true
 
