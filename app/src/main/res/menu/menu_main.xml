@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/search_item_menu_main"
+        android:icon="@drawable/ic_search"
+        android:title="搜索"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView" />
+    <item
+        android:id="@+id/switch_item_menu_main"
+        android:title="IFW开关"
+        app:actionLayout="@layout/switch_item"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/more_item_menu_main"
+        android:title="更多" />
+</menu>
