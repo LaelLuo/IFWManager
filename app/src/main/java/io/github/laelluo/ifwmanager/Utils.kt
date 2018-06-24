@@ -22,10 +22,8 @@ fun command(cmd: String = ""): Boolean {
         return false
     } finally {
         try {
-            if (os != null) {
-                os.close()
-            }
-            process!!.destroy()
+            os?.close()
+            process?.destroy()
         } catch (e: Exception) { }
     }
     return true
