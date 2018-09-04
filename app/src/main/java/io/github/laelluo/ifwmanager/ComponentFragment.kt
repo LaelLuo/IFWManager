@@ -10,13 +10,7 @@ import android.view.ViewGroup
 import android.widget.Switch
 import android.widget.TextView
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ComponentFragment.newInstance] factory method to
- * create an instance of this fragment.
- *
- */
-//TODO(item多选)
+//TODO(ActionMode多选)
 
 class ComponentFragment : Fragment() {
     private lateinit var componentType: String
