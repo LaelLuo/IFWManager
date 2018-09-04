@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Switch
 import android.widget.TextView
 
 /**
@@ -15,9 +16,12 @@ import android.widget.TextView
  * create an instance of this fragment.
  *
  */
+//TODO(item多选)
+
 class ComponentFragment : Fragment() {
-    private var componentType = ""
+    private lateinit var componentType: String
     private var components: Array<String> = arrayOf()
+    private val banList = arrayListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,8 +31,7 @@ class ComponentFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val inflate = inflater.inflate(R.layout.fragment_component, container, false)
         components.sortBy { it.split(".").last() }
@@ -50,15 +53,35 @@ class ComponentFragment : Fragment() {
                 }
     }
 
+    fun getBanList(): List<String> {
+        return banList
+    }
+
     inner class ComponentAdapter : RecyclerView.Adapter<ComponentAdapter.Holder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = Holder(LayoutInflater.from(parent.context).inflate(R.layout.item_component, parent, false))
         override fun getItemCount() = components.size
         override fun onBindViewHolder(holder: Holder, position: Int) = holder.bind(components[position])
         inner class Holder(val view: View) : RecyclerView.ViewHolder(view) {
             fun bind(name: String) {
+//                TODO(初始化item)
                 view.findViewById<TextView>(R.id.simple_name_text_component).text = name.split(".").last()
                 view.findViewById<TextView>(R.id.name_text_component).text = name
-//                TODO(初始化item)
+                val switch = view.findViewById<Switch>(R.id.switch_item_component)
+                switch.setOnCheckedChangeListener { _, b ->
+                    if (b){
+                        log("ban $name")
+                        banList.add(name)
+                    }else{
+                        banList.remove(name)
+                    }
+                }
+                view.setOnClickListener {
+                    switch.isChecked = !switch.isChecked
+                }
+                view.setOnLongClickListener {
+                    activity
+                    true
+                }
             }
         }
     }

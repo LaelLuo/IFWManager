@@ -2,6 +2,7 @@ package io.github.laelluo.ifwmanager
 
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -9,9 +10,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
 import android.view.*
-import android.widget.Filter
-import android.widget.Filterable
-import android.widget.TextView
+import android.widget.*
 import de.hdodenhof.circleimageview.CircleImageView
 import io.github.laelluo.ifwmanager.bean.AppBean
 import kotlinx.android.synthetic.main.activity_main.*
@@ -37,7 +36,6 @@ class MainActivity : AppCompatActivity() {
             setOnRefreshListener { refreshApps() }
             setColorSchemeColors(0x3F51B5)
         }
-//        TODO(初始化switch)
         refreshApps()
     }
 
@@ -45,7 +43,7 @@ class MainActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.menu_main, menu)
 //        初始化SearchView点击事件
         menu?.findItem(R.id.search_item_menu_main)?.apply {
-//            搜索触发事件
+            //            搜索触发事件
             setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
                 override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                     refresh_swiperefresh_main.isEnabled = false
@@ -72,6 +70,14 @@ class MainActivity : AppCompatActivity() {
                 })
             }
         }
+        menu?.findItem(R.id.switch_item_menu_main)?.actionView?.let { it as RelativeLayout }?.getChildAt(0).apply {
+            this as Switch
+            isChecked = Data.isOpen
+            setOnCheckedChangeListener { _, b ->
+                isChecked = b
+                Data.isOpen = b
+            }
+        }
         return true
     }
 
@@ -90,7 +96,26 @@ class MainActivity : AppCompatActivity() {
         Thread {
             Data.apps.clear()
             appAdapter.list.clear()
-            packageManager.getInstalledApplications(0).filter { it.flags and ApplicationInfo.FLAG_SYSTEM == 0 }.map { AppBean(it.loadLabel(packageManager), it.loadIcon(packageManager), it) }.sortedBy { it.label.toString() }.forEach {
+            packageManager.getInstalledPackages(0).filter { it.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM == 0 }.map {
+                AppBean(
+                        it.applicationInfo.loadLabel(packageManager).toString(),
+                        it.packageName,
+                        it.versionName,
+                        it.applicationInfo.loadIcon(packageManager),
+                        packageManager.getPackageInfo(it.packageName, PackageManager.GET_SERVICES).services
+                                ?.map { service -> service.name }
+                                ?: listOf(),
+                        packageManager.getPackageInfo(it.packageName, PackageManager.GET_RECEIVERS).receivers
+                                ?.map { receiver -> receiver.name }
+                                ?: listOf(),
+                        packageManager.getPackageInfo(it.packageName, PackageManager.GET_ACTIVITIES).activities
+                                ?.map { activity -> activity.name }
+                                ?: listOf(),
+                        packageManager.getPackageInfo(it.packageName, PackageManager.GET_PROVIDERS).providers
+                                ?.map { provider -> provider.name }
+                                ?: listOf()
+                )
+            }.sortedBy { it.label }.forEach {
                 Data.apps.add(it)
                 appAdapter.list.add(it)
             }
@@ -112,11 +137,11 @@ class MainActivity : AppCompatActivity() {
             override fun performFiltering(constraint: CharSequence?): FilterResults {
                 list.clear()
                 val string = constraint?.toString()!!
-                if (string.isEmpty()){
+                if (string.isEmpty()) {
                     list.addAll(Data.apps)
-                }else{
+                } else {
                     Data.apps.forEach {
-                        if (it.label.contains(string))list.add(it)
+                        if (it.label.contains(string)) list.add(it)
                     }
                 }
                 return FilterResults()
@@ -126,12 +151,13 @@ class MainActivity : AppCompatActivity() {
                 notifyDataSetChanged()
             }
         }
+
         inner class Holder(val view: View) : RecyclerView.ViewHolder(view) {
             fun bind(app: AppBean) {
                 view.findViewById<CircleImageView>(R.id.icon_image_app).setImageDrawable(app.icon)
                 view.findViewById<TextView>(R.id.name_text_app).text = app.label
                 view.setOnClickListener {
-                    if (Data.apps.indexOf(app) != -1){
+                    if (Data.apps.indexOf(app) != -1) {
                         startActivity(Intent(this@MainActivity, ManagerActivity::class.java).apply {
                             putExtra("position", Data.apps.indexOf(app))
                         })
